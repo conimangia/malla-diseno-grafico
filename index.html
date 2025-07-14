@@ -1,32 +1,63 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Malla Curricular – Diseño Gráfico</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 30px;
       background: #f5f5f5;
+      max-width: 700px;
+      margin: auto;
     }
     h1 {
       text-align: center;
+      margin-bottom: 40px;
     }
     .anio {
       background: #333;
       color: white;
       padding: 10px;
       margin-top: 30px;
+      font-weight: bold;
     }
     .materia {
       background: white;
-      margin: 5px 0;
+      margin: 8px 0;
       padding: 10px;
       border-left: 5px solid #2196f3;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.3s ease;
+    }
+    .materia.desactivada {
+      color: #aaa;
+      border-left-color: #bbb;
+      cursor: default;
+      text-decoration: line-through;
+      background: #ddd;
+    }
+    .materia.activa {
+      color: #000;
+      border-left-color: #2196f3;
+      cursor: pointer;
+      text-decoration: none;
+      background: white;
     }
     .correlativas {
       font-size: 0.9em;
       color: #555;
+      margin-left: 15px;
+      font-style: italic;
+    }
+    .checkbox-materia {
+      margin-right: 10px;
+      transform: scale(1.3);
+      cursor: pointer;
     }
   </style>
 </head>
@@ -34,17 +65,160 @@
   <h1>Malla Curricular – Diseño Gráfico</h1>
 
   <div class="anio">🧭 1° AÑO – CBC</div>
-  <div class="materia">Introducción al Conocimiento de la Sociedad y el Estado</div>
-  <div class="materia">Introducción al Pensamiento Científico</div>
-  <div class="materia">Introducción al Conocimiento Proyectual I</div>
-  <div class="materia">
-    Introducción al Conocimiento Proyectual II
+  <div class="materia activa" id="sociedad">
+    <label>
+      <input type="checkbox" class="checkbox-materia" data-materia="sociedad" />
+      Introducción al Conocimiento de la Sociedad y el Estado
+    </label>
+  </div>
+
+  <div class="materia activa" id="pensamiento">
+    <label>
+      <input type="checkbox" class="checkbox-materia" data-materia="pensamiento" />
+      Introducción al Pensamiento Científico
+    </label>
+  </div>
+
+  <div class="materia activa" id="proyectual1">
+    <label>
+      <input type="checkbox" class="checkbox-materia" data-materia="proyectual1" />
+      Introducción al Conocimiento Proyectual I
+    </label>
+  </div>
+
+  <div class="materia desactivada" id="proyectual2">
+    <label>
+      <input type="checkbox" class="checkbox-materia" data-materia="proyectual2" disabled />
+      Introducción al Conocimiento Proyectual II
+    </label>
     <div class="correlativas">Correlativa: Proyectual I</div>
   </div>
-  <div class="materia">Matemática</div>
-  <div class="materia">Semiología</div>
-  <div class="materia">Taller de Dibujo</div>
 
-  <!-- Después agregaremos los años siguientes -->
+  <div class="materia activa" id="matematica">
+    <label>
+      <input type="checkbox" class="checkbox-materia" data-materia="matematica" />
+      Matemática
+    </label>
+  </div>
+
+  <div class="materia activa" id="semiologia">
+    <label>
+      <input type="checkbox" class="checkbox-materia" data-materia="semiologia" />
+      Semiología
+    </label>
+  </div>
+
+  <div class="materia activa" id="taller-dibujo">
+    <label>
+      <input type="checkbox" class="checkbox-materia" data-materia="taller-dibujo" />
+      Taller de Dibujo
+    </label>
+  </div>
+
+  <div class="anio">✏️ 2° AÑO – Ciclo de Formación Inicial</div>
+  <div class="materia desactivada" id="dg1">
+    <label>
+      <input type="checkbox" class="checkbox-materia" data-materia="dg1" disabled />
+      Diseño Gráfico I (DG1)
+    </label>
+    <div class="correlativas">Correlativa: CBC completo</div>
+  </div>
+
+  <div class="materia desactivada" id="m1">
+    <label>
+      <input type="checkbox" class="checkbox-materia" data-materia="m1" disabled />
+      Morfología I (M1)
+    </label>
+    <div class="correlativas">Correlativa: CBC completo</div>
+  </div>
+
+  <!-- Podes seguir agregando todas las materias y años similares -->
+
+  <script>
+    // Defino las correlativas (clave = materia, valor = array de materias desbloqueadas)
+    const correlativas = {
+      proyectual1: ["proyectual2"],
+      // El CBC completo es que todas las materias de 1er año estén aprobadas
+      // Entonces para habilitar 2do año, validamos el estado de todas materias de 1er año
+      // Por ejemplo, dg1, m1, tip1, c1, h1, tec1, electiva1 necesitan CBC completo
+    };
+
+    // Para materias que requieren CBC completo (todas de 1er año)
+    const materiasPrimerAnio = [
+      "sociedad",
+      "pensamiento",
+      "proyectual1",
+      "proyectual2",
+      "matematica",
+      "semiologia",
+      "taller-dibujo"
+    ];
+
+    const materiasSegundoAnio = ["dg1", "m1"]; // Pueden agregar más acá
+
+    // Función para chequear si CBC está completo
+    function cbcCompleto() {
+      return materiasPrimerAnio.every(materiaId => {
+        const checkbox = document.querySelector(`#${materiaId} input[type="checkbox"]`);
+        return checkbox && checkbox.checked;
+      });
+    }
+
+    // Función para actualizar materias habilitadas
+    function actualizarMaterias() {
+      // Si CBC completo, habilito materias de 2do año
+      const habilitarSegundoAnio = cbcCompleto();
+
+      materiasSegundoAnio.forEach(materiaId => {
+        const divMateria = document.getElementById(materiaId);
+        const checkbox = divMateria.querySelector("input[type='checkbox']");
+        if (habilitarSegundoAnio) {
+          divMateria.classList.remove("desactivada");
+          divMateria.classList.add("activa");
+          checkbox.disabled = false;
+        } else {
+          divMateria.classList.add("desactivada");
+          divMateria.classList.remove("activa");
+          checkbox.disabled = true;
+          checkbox.checked = false;
+        }
+      });
+
+      // Correlativas específicas
+      for (const [materia, desbloquea] of Object.entries(correlativas)) {
+        const materiaCheck = document.querySelector(`#${materia} input[type="checkbox"]`);
+        if (materiaCheck && materiaCheck.checked) {
+          desbloquea.forEach(materiaId => {
+            const divDesbloqueada = document.getElementById(materiaId);
+            const checkboxDesbloqueada = divDesbloqueada.querySelector("input[type='checkbox']");
+            divDesbloqueada.classList.remove("desactivada");
+            divDesbloqueada.classList.add("activa");
+            checkboxDesbloqueada.disabled = false;
+          });
+        } else {
+          desbloquea.forEach(materiaId => {
+            const divDesbloqueada = document.getElementById(materiaId);
+            const checkboxDesbloqueada = divDesbloqueada.querySelector("input[type='checkbox']");
+            divDesbloqueada.classList.add("desactivada");
+            divDesbloqueada.classList.remove("activa");
+            checkboxDesbloqueada.disabled = true;
+            checkboxDesbloqueada.checked = false;
+          });
+        }
+      }
+    }
+
+    // Agrego event listeners a todos los checkboxes
+    document.querySelectorAll(".checkbox-materia").forEach(cb => {
+      cb.addEventListener("change", () => {
+        actualizarMaterias();
+      });
+    });
+
+    // Al cargar la página, actualizo el estado
+    window.addEventListener("load", () => {
+      actualizarMaterias();
+    });
+  </script>
 </body>
 </html>
