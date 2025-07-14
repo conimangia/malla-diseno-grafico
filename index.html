@@ -33,7 +33,7 @@
     { id: "TD", nombre: "Taller de Dibujo" },
   ];
 
-  // Materias segundo año, con correlativa CBC completa
+  // Materias segundo año, con correlativa CBC completo
   const segundoAno = [
     { id: "DG1", nombre: "Diseño Gráfico I" },
     { id: "M1", nombre: "Morfología I" },
@@ -49,15 +49,15 @@
   function render() {
     container.innerHTML = "";
 
-    // Recolectamos materias aprobadas (checkbox checked)
+    // Obtenemos las materias aprobadas (checkbox checked)
     const aprobadas = new Set(
       [...document.querySelectorAll("input[type=checkbox]:checked")].map(cb => cb.value)
     );
 
-    // Chequeo si CBC completo (primer año todo aprobado)
+    // Verificamos si CBC está completo (todas las materias del primer año aprobadas)
     const cbcCompleto = primerAno.every(m => aprobadas.has(m.id));
 
-    // Render primer año: siempre habilitados
+    // Render primer año
     const divPrimerAno = document.createElement("div");
     divPrimerAno.className = "anio";
     const h2PrimerAno = document.createElement("h2");
@@ -73,7 +73,7 @@
       checkbox.type = "checkbox";
       checkbox.value = materia.id;
       checkbox.checked = aprobadas.has(materia.id);
-      checkbox.disabled = false; // Siempre habilitados
+      checkbox.disabled = false; // Siempre habilitados para primer año
 
       checkbox.addEventListener("change", render);
 
@@ -88,7 +88,7 @@
 
     container.appendChild(divPrimerAno);
 
-    // Render segundo año: solo habilitar si CBC completo
+    // Render segundo año
     const divSegundoAno = document.createElement("div");
     divSegundoAno.className = "anio";
     const h2SegundoAno = document.createElement("h2");
@@ -104,9 +104,11 @@
       checkbox.type = "checkbox";
       checkbox.value = materia.id;
       checkbox.checked = aprobadas.has(materia.id);
-      checkbox.disabled = !cbcCompleto; // Solo habilitar si CBC completo
+      checkbox.disabled = !cbcCompleto; // Deshabilitado si CBC no completo
 
-      divMat.classList.toggle("bloqueada", !cbcCompleto && !aprobadas.has(materia.id));
+      if (!cbcCompleto && !aprobadas.has(materia.id)) {
+        divMat.classList.add("bloqueada");
+      }
 
       checkbox.addEventListener("change", render);
 
