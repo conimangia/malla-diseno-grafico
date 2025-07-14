@@ -2,27 +2,128 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
-<title>Prueba Checkboxes Primer Año</title>
+<title>Malla Curricular Básica Interactiva</title>
 <style>
   body { background: #001f4d; color: #cce6ff; font-family: Arial, sans-serif; padding: 20px; }
-  .materia { margin: 10px 0; padding: 10px; border: 2px solid #3399ff; border-radius: 12px; background: #004080; }
+  .materia { margin: 10px 0; padding: 10px; border: 2px solid #3399ff; border-radius: 12px; background: #004080; display: flex; align-items: center; }
+  .materia.aprobada { background: #0073e6; text-decoration: line-through; }
+  .materia.bloqueada { opacity: 0.5; cursor: not-allowed; }
   input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; }
+  input[type="checkbox"]:disabled { cursor: not-allowed; }
+  h1, h2 { color: #99ccff; user-select: none; }
+  h2 { border-bottom: 2px solid #3399ff; padding-bottom: 5px; }
+  label { margin-left: 8px; user-select: none; }
 </style>
 </head>
 <body>
 
-<h1>Prueba Checkboxes Primer Año</h1>
+<h1>Malla Curricular Diseño Gráfico</h1>
 
-<div id="materias">
-  <div class="materia"><input type="checkbox" id="MCSyE"><label for="MCSyE">Introducción al Conocimiento de la Sociedad y el Estado</label></div>
-  <div class="materia"><input type="checkbox" id="IPC"><label for="IPC">Introducción al Pensamiento Científico</label></div>
-  <div class="materia"><input type="checkbox" id="ICP1"><label for="ICP1">Introducción al Conocimiento Proyectual I</label></div>
-  <div class="materia"><input type="checkbox" id="ICP2"><label for="ICP2">Introducción al Conocimiento Proyectual II</label></div>
-  <div class="materia"><input type="checkbox" id="MAT"><label for="MAT">Matemática</label></div>
-  <div class="materia"><input type="checkbox" id="SEM"><label for="SEM">Semiología</label></div>
-  <div class="materia"><input type="checkbox" id="TD"><label for="TD">Taller de Dibujo</label></div>
-</div>
+<div id="malla-container"></div>
+
+<script>
+  // Materias primer año (CBC)
+  const primerAno = [
+    { id: "MCSyE", nombre: "Introducción al Conocimiento de la Sociedad y el Estado" },
+    { id: "IPC", nombre: "Introducción al Pensamiento Científico" },
+    { id: "ICP1", nombre: "Introducción al Conocimiento Proyectual I" },
+    { id: "ICP2", nombre: "Introducción al Conocimiento Proyectual II" },
+    { id: "MAT", nombre: "Matemática" },
+    { id: "SEM", nombre: "Semiología" },
+    { id: "TD", nombre: "Taller de Dibujo" },
+  ];
+
+  // Materias segundo año, con correlativa CBC completa
+  const segundoAno = [
+    { id: "DG1", nombre: "Diseño Gráfico I" },
+    { id: "M1", nombre: "Morfología I" },
+    { id: "TIP1", nombre: "Tipografía I" },
+    { id: "C1", nombre: "Comunicación I" },
+    { id: "H1", nombre: "Historia I" },
+    { id: "TEC1", nombre: "Tecnología I" },
+    { id: "ELEC1", nombre: "Electiva I (Fotografía o Ilustración)" },
+  ];
+
+  const container = document.getElementById("malla-container");
+
+  function render() {
+    container.innerHTML = "";
+
+    // Recolectamos materias aprobadas (checkbox checked)
+    const aprobadas = new Set(
+      [...document.querySelectorAll("input[type=checkbox]:checked")].map(cb => cb.value)
+    );
+
+    // Chequeo si CBC completo (primer año todo aprobado)
+    const cbcCompleto = primerAno.every(m => aprobadas.has(m.id));
+
+    // Render primer año: siempre habilitados
+    const divPrimerAno = document.createElement("div");
+    divPrimerAno.className = "anio";
+    const h2PrimerAno = document.createElement("h2");
+    h2PrimerAno.textContent = "📅 1° Año – CBC (Ciclo Básico Común)";
+    divPrimerAno.appendChild(h2PrimerAno);
+
+    primerAno.forEach(materia => {
+      const divMat = document.createElement("div");
+      divMat.className = "materia";
+      if (aprobadas.has(materia.id)) divMat.classList.add("aprobada");
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.value = materia.id;
+      checkbox.checked = aprobadas.has(materia.id);
+      checkbox.disabled = false; // Siempre habilitados
+
+      checkbox.addEventListener("change", render);
+
+      const label = document.createElement("label");
+      label.htmlFor = materia.id;
+      label.textContent = materia.nombre;
+
+      divMat.appendChild(checkbox);
+      divMat.appendChild(label);
+      divPrimerAno.appendChild(divMat);
+    });
+
+    container.appendChild(divPrimerAno);
+
+    // Render segundo año: solo habilitar si CBC completo
+    const divSegundoAno = document.createElement("div");
+    divSegundoAno.className = "anio";
+    const h2SegundoAno = document.createElement("h2");
+    h2SegundoAno.textContent = "📅 2° Año – Ciclo de Formación Inicial";
+    divSegundoAno.appendChild(h2SegundoAno);
+
+    segundoAno.forEach(materia => {
+      const divMat = document.createElement("div");
+      divMat.className = "materia";
+      if (aprobadas.has(materia.id)) divMat.classList.add("aprobada");
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.value = materia.id;
+      checkbox.checked = aprobadas.has(materia.id);
+      checkbox.disabled = !cbcCompleto; // Solo habilitar si CBC completo
+
+      divMat.classList.toggle("bloqueada", !cbcCompleto && !aprobadas.has(materia.id));
+
+      checkbox.addEventListener("change", render);
+
+      const label = document.createElement("label");
+      label.htmlFor = materia.id;
+      label.textContent = materia.nombre;
+
+      divMat.appendChild(checkbox);
+      divMat.appendChild(label);
+      divSegundoAno.appendChild(divMat);
+    });
+
+    container.appendChild(divSegundoAno);
+  }
+
+  render();
+</script>
 
 </body>
 </html>
-
