@@ -2,10 +2,13 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
-<title>Malla Curricular Interactiva</title>
+<title>Malla Curricular con Correlativas</title>
 <style>
   body { background: #001f4d; color: #cce6ff; font-family: Arial, sans-serif; padding: 20px; }
-  .materia { margin: 10px 0; padding: 10px; border: 2px solid #3399ff; border-radius: 12px; background: #004080; display: flex; align-items: center; }
+  .materia {
+    margin: 10px 0; padding: 10px; border: 2px solid #3399ff; border-radius: 12px;
+    background: #004080; display: flex; align-items: center;
+  }
   .materia.bloqueada { opacity: 0.5; cursor: not-allowed; }
   input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; }
   input[type="checkbox"]:disabled { cursor: not-allowed; }
@@ -19,47 +22,80 @@
 <h1>Malla Curricular Diseño Gráfico</h1>
 
 <h2>📅 1° Año – CBC (Ciclo Básico Común)</h2>
-<div class="materia"><input type="checkbox" class="primer-ano" id="MCSyE"><label for="MCSyE">Introducción al Conocimiento de la Sociedad y el Estado</label></div>
-<div class="materia"><input type="checkbox" class="primer-ano" id="IPC"><label for="IPC">Introducción al Pensamiento Científico</label></div>
-<div class="materia"><input type="checkbox" class="primer-ano" id="ICP1"><label for="ICP1">Introducción al Conocimiento Proyectual I</label></div>
-<div class="materia"><input type="checkbox" class="primer-ano" id="ICP2"><label for="ICP2">Introducción al Conocimiento Proyectual II</label></div>
-<div class="materia"><input type="checkbox" class="primer-ano" id="MAT"><label for="MAT">Matemática</label></div>
-<div class="materia"><input type="checkbox" class="primer-ano" id="SEM"><label for="SEM">Semiología</label></div>
-<div class="materia"><input type="checkbox" class="primer-ano" id="TD"><label for="TD">Taller de Dibujo</label></div>
+<div class="materia"><input type="checkbox" id="MCSyE"><label for="MCSyE">Introducción al Conocimiento de la Sociedad y el Estado</label></div>
+<div class="materia"><input type="checkbox" id="IPC"><label for="IPC">Introducción al Pensamiento Científico</label></div>
+<div class="materia"><input type="checkbox" id="ICP1"><label for="ICP1">Introducción al Conocimiento Proyectual I</label></div>
+<div class="materia"><input type="checkbox" id="ICP2"><label for="ICP2">Introducción al Conocimiento Proyectual II</label></div>
+<div class="materia"><input type="checkbox" id="MAT"><label for="MAT">Matemática</label></div>
+<div class="materia"><input type="checkbox" id="SEM"><label for="SEM">Semiología</label></div>
+<div class="materia"><input type="checkbox" id="TD"><label for="TD">Taller de Dibujo</label></div>
 
 <h2>📅 2° Año – Ciclo de Formación Inicial</h2>
-<div class="materia"><input type="checkbox" class="segundo-ano" id="DG1" disabled><label for="DG1">Diseño Gráfico I</label></div>
-<div class="materia"><input type="checkbox" class="segundo-ano" id="M1" disabled><label for="M1">Morfología I</label></div>
-<div class="materia"><input type="checkbox" class="segundo-ano" id="TIP1" disabled><label for="TIP1">Tipografía I</label></div>
-<div class="materia"><input type="checkbox" class="segundo-ano" id="C1" disabled><label for="C1">Comunicación I</label></div>
-<div class="materia"><input type="checkbox" class="segundo-ano" id="H1" disabled><label for="H1">Historia I</label></div>
-<div class="materia"><input type="checkbox" class="segundo-ano" id="TEC1" disabled><label for="TEC1">Tecnología I</label></div>
-<div class="materia"><input type="checkbox" class="segundo-ano" id="ELEC1" disabled><label for="ELEC1">Electiva I (Fotografía o Ilustración)</label></div>
+<div class="materia"><input type="checkbox" id="DG1" disabled><label for="DG1">Diseño Gráfico I</label></div>
+<div class="materia"><input type="checkbox" id="M1" disabled><label for="M1">Morfología I</label></div>
+<div class="materia"><input type="checkbox" id="TIP1" disabled><label for="TIP1">Tipografía I</label></div>
+<div class="materia"><input type="checkbox" id="C1" disabled><label for="C1">Comunicación I</label></div>
+<div class="materia"><input type="checkbox" id="H1" disabled><label for="H1">Historia I</label></div>
+<div class="materia"><input type="checkbox" id="TEC1" disabled><label for="TEC1">Tecnología I</label></div>
+<div class="materia"><input type="checkbox" id="ELEC1" disabled><label for="ELEC1">Electiva I (Fotografía o Ilustración)</label></div>
 
 <script>
-  const primerAnoCheckboxes = document.querySelectorAll('.primer-ano');
-  const segundoAnoCheckboxes = document.querySelectorAll('.segundo-ano');
+  // Definimos correlativas: clave = materia, valor = array de materias que debe tener aprobadas
+  const correlativas = {
+    // Segundo año depende de CBC completo (todas del primer año)
+    DG1: ["MCSyE", "IPC", "ICP1", "ICP2", "MAT", "SEM", "TD"],
+    M1: ["MCSyE", "IPC", "ICP1", "ICP2", "MAT", "SEM", "TD"],
+    TIP1: ["MCSyE", "IPC", "ICP1", "ICP2", "MAT", "SEM", "TD"],
+    C1: ["MCSyE", "IPC", "ICP1", "ICP2", "MAT", "SEM", "TD"],
+    H1: ["MCSyE", "IPC", "ICP1", "ICP2", "MAT", "SEM", "TD"],
+    TEC1: ["MCSyE", "IPC", "ICP1", "ICP2", "MAT", "SEM", "TD"],
+    ELEC1: ["MCSyE", "IPC", "ICP1", "ICP2", "MAT", "SEM", "TD"],
+  };
 
-  function checkCBCCompleto() {
-    // Verifica si todas las materias del primer año están marcadas
-    return Array.from(primerAnoCheckboxes).every(cb => cb.checked);
+  // Todas las materias (1er y 2do año)
+  const materias = [
+    "MCSyE","IPC","ICP1","ICP2","MAT","SEM","TD",
+    "DG1","M1","TIP1","C1","H1","TEC1","ELEC1"
+  ];
+
+  function puedeHabilitar(materia, aprobadasSet) {
+    if (!correlativas[materia]) return true; // Sin correlativas, siempre habilitada
+    // Requiere que todas las correlativas estén aprobadas
+    return correlativas[materia].every(req => aprobadasSet.has(req));
   }
 
-  function actualizarSegundoAno() {
-    const habilitar = checkCBCCompleto();
-    segundoAnoCheckboxes.forEach(cb => {
-      cb.disabled = !habilitar;
-      cb.parentElement.classList.toggle('bloqueada', !habilitar);
-      if (!habilitar) cb.checked = false; // Desmarcar si se bloquea
+  function actualizarEstado() {
+    const aprobadas = new Set(
+      materias.filter(id => document.getElementById(id).checked)
+    );
+
+    materias.forEach(id => {
+      const cb = document.getElementById(id);
+      if (id.startsWith("MCSyE") || id.startsWith("IPC") || id.startsWith("ICP1") || id.startsWith("ICP2") || id.startsWith("MAT") || id.startsWith("SEM") || id.startsWith("TD")) {
+        // Primer año: siempre habilitado
+        cb.disabled = false;
+        cb.parentElement.classList.remove("bloqueada");
+      } else {
+        // Segundo año: depende de correlativas
+        if (puedeHabilitar(id, aprobadas)) {
+          cb.disabled = false;
+          cb.parentElement.classList.remove("bloqueada");
+        } else {
+          cb.checked = false;
+          cb.disabled = true;
+          cb.parentElement.classList.add("bloqueada");
+        }
+      }
     });
   }
 
-  primerAnoCheckboxes.forEach(cb => {
-    cb.addEventListener('change', actualizarSegundoAno);
+  // Agregamos listener a todos los checkboxes
+  materias.forEach(id => {
+    document.getElementById(id).addEventListener("change", actualizarEstado);
   });
 
-  // Inicializamos el estado
-  actualizarSegundoAno();
+  // Al cargar la página, actualizar estado
+  actualizarEstado();
 </script>
 
 </body>
